@@ -71,3 +71,62 @@ Pre-image Resistance,"It is a ""one-way street."" You cannot derive the input fr
 
     Action: The system hashes the message and encrypts that hash. This proves that the message came from you and hasn't been altered.
 
+#### How Hash Functions Process Data
+1. Block-by-Block Processing
+
+Cryptographic hashes like MD5, SHA-1, and SHA-256 don't process a file as one giant unit. Instead, they divide the data into fixed-size chunks (typically 512 bits).
+2. The Necessity of Padding
+
+If your data isn't a perfect multiple of the block size, the algorithm uses Padding. This isn't just "junk" data; it follows a strict mathematical rule:
+
+    Alignment: A "1" bit is added, followed by "0" bits to fill the block.
+
+    Length Encoding: The very last 64 bits of the final block are reserved to store the original message length.
+
+### Example: The 512-bit Block
+
+Imagine a message that is exactly 448 bits long. To reach the required 512-bit block size:
+
+    Data: 448 bits.
+
+    Separator: +1 bit (the "1").
+
+    Filler: +63 bits (the "0"s).
+
+    Total: 512 bits.
+
+    Security Note: If the message + padding exceeds the block limit, the algorithm simply creates a new block to hold the length encoding.
+
+3. Internal States & Registers
+
+As each block is processed, the hash function updates its Internal State—a set of fixed-size values called registers.
+
+    MD5 uses 4 registers (A, B, C, D).
+
+    SHA-256 uses 8 registers (A through H).
+
+Think of the internal state as a running total. Each block "scrambles" the registers using bitwise operations (AND, OR, XOR, Shifts). Once the last block is processed, the final values in these registers are the hash.
+
+- Feature: 
+
+    - MD5: 
+    Status: Broken (Collisions found)
+    Block Size: 512 bits
+    Internal State: 128bits
+    Rounds: 64 rounds
+
+
+    - SHA-256: 
+    Status: Secure (Industry Standard)
+    Block Size: 512 bits
+    Internal State: 254 bits
+    Rounds: 64 rounds
+
+The "Vulnerability" Connection: Length Extension
+
+Because these functions update a "state" and move to the next block, an attacker who knows the final hash actually knows the final state of the registers.
+
+- By starting a new block with that "final state," an attacker can add their own data and continue the hashing process as if they were the original sender. This is the foundation of the Length Extension Attack you are documenting in your repo.
+Security+ Tip (Domain 2.0)
+
+- The exam might ask about Hashing Salts. While padding is a mathematical requirement for the algorithm to function, Salting is a security measure added before hashing to prevent Rainbow Table attacks. Don't confuse the two!
