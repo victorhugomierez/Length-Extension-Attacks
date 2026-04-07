@@ -95,7 +95,7 @@ Imagine a message that is exactly 448 bits long. To reach the required 512-bit b
 
     Total: 512 bits.
 
-    Security Note: If the message + padding exceeds the block limit, the algorithm simply creates a new block to hold the length encoding.
+     Security Note: If the message + padding exceeds the block limit, the algorithm simply creates a new block to hold the length encoding.
 
 3. Internal States & Registers
 
@@ -130,3 +130,6 @@ Because these functions update a "state" and move to the next block, an attacker
 Security+ Tip (Domain 2.0)
 
 - The exam might ask about Hashing Salts. While padding is a mathematical requirement for the algorithm to function, Salting is a security measure added before hashing to prevent Rainbow Table attacks. Don't confuse the two!
+
+![Hash Function Data Processing, Padding, and State Updates](assets/hash_processing.png)
+Diagram illustrating three stages of SHA hash function processing: (1) Message Padding showing 512-bit block alignment with 448-bit message data, 1-bit separator, 0-bit filler, and 64-bit length encoding; (2) Block-by-Block Processing depicting padded blocks entering hash rounds of bitwise and XOR operations with state updates from State N to State N+1; (3) Internal State Updates showing State 0 registers A, B, C, D progressing through State N after processing blocks, culminating in final hash State N+1. Technical diagram with blue, green, and gray color coding for data components and arrows indicating data flow.
