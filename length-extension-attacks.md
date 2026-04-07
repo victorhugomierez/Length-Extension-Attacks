@@ -133,3 +133,17 @@ Security+ Tip (Domain 2.0)
 
 ![Hash Function Data Processing, Padding, and State Updates](assets/hash_processing.png)
 Diagram illustrating three stages of SHA hash function processing: (1) Message Padding showing 512-bit block alignment with 448-bit message data, 1-bit separator, 0-bit filler, and 64-bit length encoding; (2) Block-by-Block Processing depicting padded blocks entering hash rounds of bitwise and XOR operations with state updates from State N to State N+1; (3) Internal State Updates showing State 0 registers A, B, C, D progressing through State N after processing blocks, culminating in final hash State N+1. Technical diagram with blue, green, and gray color coding for data components and arrows indicating data flow.
+
+### Why it's vulnerable:
+ MDS's internal state and padding are predictable, making it vulnerable to attacks like length extension, where an attacker can append data to a message and still generate a valid hash. This hash function is also obsolete for security-sensitive applications due to collision vulnerabilities.
+
+ ### SHA-1
+
+    Block size: 512 bits
+    Internal state: 160 bits, split into 5 words (A, B, C, D, E)
+    Rounds: SHA-1 processes each block through 80 rounds of transformations, much like, but with more complexity.
+- ‘This architecture ensures that even the slightest alteration to the 512-bit input block results in a completely different 160-bit hash, due to the avalanche effect generated across the 80 transformation rounds.’
+![SHA-1 Hash Function Architecture showing 512-bit block, 160-bit state (words A-E), and 80 rounds of processing](assets/sha1_architecture.png)
+
+![SHA-1 Hash Function Architecture displaying a 512-bit input block containing 16 message words (W0 through W15) that expand into 80 rounds of message words through a message schedule expansion process. The architecture shows a 160-bit internal state comprising five 32-bit registers labeled A, B, C, D, and E. Each of the 80 rounds performs bitwise operations including shifts, XOR, and a non-linear function (f) combined with round constants (k), updating the state sequentially until the final hash output emerges from the five state registers after all 80 rounds complete. Technical diagram with blue, green, and gray color coding showing data flow from input block through expansion, processing rounds, and final hash generation.]
+
