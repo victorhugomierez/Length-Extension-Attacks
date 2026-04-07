@@ -147,3 +147,20 @@ Diagram illustrating three stages of SHA hash function processing: (1) Message P
 
 ![SHA-1 Hash Function Architecture displaying a 512-bit input block containing 16 message words (W0 through W15) that expand into 80 rounds of message words through a message schedule expansion process. The architecture shows a 160-bit internal state comprising five 32-bit registers labeled A, B, C, D, and E. Each of the 80 rounds performs bitwise operations including shifts, XOR, and a non-linear function (f) combined with round constants (k), updating the state sequentially until the final hash output emerges from the five state registers after all 80 rounds complete. Technical diagram with blue, green, and gray color coding showing data flow from input block through expansion, processing rounds, and final hash generation.]
 
+### Why it's vulnerable: 
+- SHA-1 has been proven to have weaknesses in its ability to prevent collisions, and like , it's vulnerable to length extension attacks. This is why it's considered outdated for modern security. Similarly to , this hash function is also obsolete for security-sensitive applications due to collision vulnerabilities.
+
+
+### SHA-256
+    Block size: 512 bits
+    Internal state: 256 bits, split into 8 words (A, B, C, D, E, F, G, H)
+    Rounds: 
+
+    processes each block through 64 rounds of operations, updating its state with bitwise shifts, rotations, and additions.
+
+Click to enlarge the image.
+
+![SHA-256 Hash Function Architecture showing 512-bit block, 256-bit state (words A-H), and 64 rounds of processing](assets/sha256_architecture.png)
+
+![SHA-256 input block structure showing 512 bits total with 32-bit words W0, W1, through W15 arranged in blue and green boxes at the top. Message schedule expansion shown below with arrows indicating expansion from 16 words to 64 rounds worth of message words W0 through W63. Internal state displayed as 8 boxes labeled A through H representing 256 bits split into 8 32-bit registers. Central processing shows SHA-256 Round t with shift operators, XOR gates, and functions labeled Ch and Maj in green. Round processing outputs to update state t+1, with vertical arrow on right showing 64 ROUNDS iteration. Final registers A through H output to 256-bit hash result in dark blue. Technical diagram with light gray network pattern background.]
+
