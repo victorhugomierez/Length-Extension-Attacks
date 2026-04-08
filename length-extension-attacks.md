@@ -119,7 +119,7 @@ Think of the internal state as a running total. Each block "scrambles" the regis
     - SHA-256: 
     Status: Secure (Industry Standard)
     Block Size: 512 bits
-    Internal State: 254 bits
+    Internal State: 256 bits
     Rounds: 64 rounds
 
 The "Vulnerability" Connection: Length Extension
@@ -163,4 +163,64 @@ Click to enlarge the image.
 ![SHA-256 Hash Function Architecture showing 512-bit block, 256-bit state (words A-H), and 64 rounds of processing](assets/sha256_architecture.png)
 
 ![SHA-256 input block structure showing 512 bits total with 32-bit words W0, W1, through W15 arranged in blue and green boxes at the top. Message schedule expansion shown below with arrows indicating expansion from 16 words to 64 rounds worth of message words W0 through W63. Internal state displayed as 8 boxes labeled A through H representing 256 bits split into 8 32-bit registers. Central processing shows SHA-256 Round t with shift operators, XOR gates, and functions labeled Ch and Maj in green. Round processing outputs to update state t+1, with vertical arrow on right showing 64 ROUNDS iteration. Final registers A through H output to 256-bit hash result in dark blue. Technical diagram with light gray network pattern background.]
+
+### Why it's better but not perfect:
+- is much stronger than and SHA-1, but it's still vulnerable to length extension attacks if used incorrectly—especially if it's used without a secret key (like in HMAC).
+
+### Case Study: ‘victorhugo’
+
+For a hash function to process the name ‘victorhugo’, it must follow a series of strict mechanical steps before generating the final digest.
+1. Preparation and Padding
+
+The name ‘victorhugo’ has 10 characters. In ASCII/UTF-8 encoding, this equates to 80 bits. As functions such as SHA-256 require 512-bit blocks, the message must be ‘padded’.
+
+    The Message: victorhugo (80 bits).
+
+    The Separator: A 1 is added at the end.
+
+    The Padding (Zeros): 0s are added until the total reaches 448 bits.
+
+    Length Encoding: The last 64 bits of the block are reserved to write the number 80 (the original length).
+
+2. Configuración del Estado Inicial
+
+Antes de procesar el bloque, la función carga sus registros internos con valores constantes.
+
+    Para "victorhugo", estos registros (A, B, C, D, E, F, G, H) actúan como el "punto de partida" de la computación.
+
+    En este estado inicial, la función aún no "sabe" nada sobre tu nombre; es simplemente la maquinaria lista para trabajar.
+
+3. Computación por Bloques (The Crunching)
+
+La función no procesa los 10 caracteres de golpe, sino que divide el bloque de 512 bits en segmentos más pequeños para las rondas matemáticas.
+
+    Transformación: El bloque que contiene victorhugo + padding entra en una serie de 64 rondas (en el caso de SHA-256).
+
+    Operaciones: Se realizan desplazamientos de bits, rotaciones y operaciones lógicas (XOR, AND).
+
+    Efecto Cascada: Si cambiaras la "v" de tu nombre por una "V" mayúscula, el resultado de la primera ronda cambiaría drásticamente, y ese cambio se multiplicaría en cada una de las 63 rondas restantes.
+
+4. Generación del Hash Final
+
+Una vez que se completan todas las rondas de computación, los valores finales de los registros se concatenan para formar la cadena hexadecimal que conocemos.
+
+Entrada: 
+victorhugo
+
+Tipo de Hash:
+SHA0256
+
+Digest (Ejemplo Ilustrativo):
+ SHA-256,e3b0c442...(valor fijo de 256 bits)
+
+    - Key Concept: The hash generated from ‘victorhugo’ is, in fact, a ‘snapshot’ of the function’s internal state after processing that name. An attacker takes that ‘snapshot’ (the hash), loads it into their own function, and appends further data (such as ‘&admin=true’), continuing the process as if it had never been interrupted.
+
+1. Character Conversion: Shows the progression of each character in the string ‘victorhugo’ (v, i, c, t, o, r, h, u, g, o) through its ASCII (decimal) values and its 8-bit binary representation.
+
+2. Organisation into Words: Illustrates how the 8 bits of each character are grouped into 32-bit words (W0, W1, W2), preparing them for SHA-256 computation.
+
+3. Block Preparation: Displays the complete 512-bit block, composed of 16 32-bit words, showing how the 80 bits of the original message are placed at the start, before applying the padding that expands it to the required 512 bits.
+
+![ASCII to Binary Conversion for SHA-256 using input "victorhugo" illustrating character-by-character transformation to 8-bit binary and organization into 32-bit words within a 512-bit block structure](assets/ascii_to_binary_victorhugo_sha256.png)
+Conversion from ASCII to binary for SHA-256 processing of the input ‘victorhugo’. Shows the character-by-character transformation: v(118), i(105), c(99), t(116,111), o(114), r(104), h(117), u(103), g(103), o(111) which are converted to 8-bit binary representations, then organised into 32-bit words W0, W1, W2 within a 512-bit block structure. The diagram shows three processing stages with colour-coded sections: 8-bit binary values for each character, grouping of 32-bit words, and the complete layout of the 512-bit block showing the location of the message data prior to padding expansion. Technical-educational diagram with blue, green, orange and grey blocks connected by downward arrows indicating the data flow from individual characters, through binary conversion, to the final organisation of the 512-bit block.
 
