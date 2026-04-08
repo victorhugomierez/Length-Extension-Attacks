@@ -224,3 +224,60 @@ Digest (Ejemplo Ilustrativo):
 ![ASCII to Binary Conversion for SHA-256 using input "victorhugo" illustrating character-by-character transformation to 8-bit binary and organization into 32-bit words within a 512-bit block structure](assets/ascii_to_binary_victorhugo_sha256.png)
 Conversion from ASCII to binary for SHA-256 processing of the input ‘victorhugo’. Shows the character-by-character transformation: v(118), i(105), c(99), t(116,111), o(114), r(104), h(117), u(103), g(103), o(111) which are converted to 8-bit binary representations, then organised into 32-bit words W0, W1, W2 within a 512-bit block structure. The diagram shows three processing stages with colour-coded sections: 8-bit binary values for each character, grouping of 32-bit words, and the complete layout of the 512-bit block showing the location of the message data prior to padding expansion. Technical-educational diagram with blue, green, orange and grey blocks connected by downward arrows indicating the data flow from individual characters, through binary conversion, to the final organisation of the 512-bit block.
 
+### Padding Guide: From Message to 512-bit Block
+
+The padding process is not random; it is a rigid structure that ensures the algorithm always receives an input of a predictable size.
+
+1. The Separator (The ‘1’ bit)
+
+Once the message (e.g. victorhugo or TryHackMe) has been converted to binary, the first thing the function does is add a single bit 1.
+
+    Purpose: It acts as a ‘watermark’ that separates the actual content from the padding.
+
+    Result: If your message was 80 bits long, it is now 81 bits long.
+
+2. Zero-padding (to 448 bits)
+
+The function adds zeros (0) en masse until the block reaches exactly 448 bits.
+
+    Why 448 and not 512? Because we need to reserve exactly 64 bits at the end for the length metadata.
+
+    Example: If you have 81 bits after the separator, the function will insert 367 zeros.
+
+3. The Length Field (The last 64 bits)
+
+The last 64 bits of the block are used to specify, in binary, the length of the original message before padding.
+
+    Example: For ‘victorhugo’ (10 characters), the length is 80. Those final 64 bits will contain the binary representation of the number 80.
+
+    Importance for LEA: An attacker must know or guess this original length in order to construct the necessary fake padding before adding their own data.
+
+### Comparative Example of Structure
+
+Componente,
+Data Original
+
+Tamaño (Ejemplo 80 bits),
+80 bits
+
+Component,
+Original Data
+
+Size (Example: 80 bits),
+80 bits
+
+Function
+The actual content (victorhugo).
+
+Separator, 1 bit, ‘Indicates: “The message ends here”.’
+
+Padding zeros, 367 bits, Mathematical alignment.
+
+Length code, 64 bits, ‘Stores the value “80”.’
+
+Total, 512 bits, Block ready for processing.
+
+
+-  To carry out a successful attack, the attacker manually recreates this padding (bit 1, the zeros and the length) so that the server believes the original message has ended. They then append their own malicious data immediately afterwards. As the server processes block by block, it simply continues the calculation from the previous state without suspecting that the padding was injected by a third party.
+
+![SHA-256 padding process for the message TryHackMe showing three sequential steps: Step 1 appends a 1 bit after the 72-bit message, Step 2 adds 375 zero bits for alignment to reach 448 bits, Step 3 appends the 64-bit length encoding containing the value 72, resulting in a complete 512-bit block ready for hash processing. Each step is illustrated with color-coded bit sequences and byte boundaries against a technical grid background.](assets/sha256_padding_process.png)
