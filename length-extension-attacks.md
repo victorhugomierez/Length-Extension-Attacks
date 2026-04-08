@@ -278,6 +278,10 @@ Length code, 64 bits, ‘Stores the value “80”.’
 Total, 512 bits, Block ready for processing.
 
 
--  To carry out a successful attack, the attacker manually recreates this padding (bit 1, the zeros and the length) so that the server believes the original message has ended. They then append their own malicious data immediately afterwards. As the server processes block by block, it simply continues the calculation from the previous state without suspecting that the padding was injected by a third party.
+ -  ‘To carry out a successful attack, the attacker manually recreates this padding (bit 1, the zeros and the length) so that the server believes the original message has ended. They then “appends” their own malicious data immediately afterwards. As the server processes block by block, it simply continues the calculation from the previous state without suspecting that the padding was injected by a third party.’
+ - SHA-256 padding process for the message showing three sequential steps: Step 1 appends a 1 bit after the 72-bit message, Step 2 adds 375 zero bits for alignment to reach 448 bits, Step 3 appends the 64-bit length encoding containing the value 72, resulting in a complete 512-bit block ready for hash processing. Each step is illustrated with color-coded bit sequences and byte boundaries against a technical grid background.
 
-![SHA-256 padding process for the message TryHackMe showing three sequential steps: Step 1 appends a 1 bit after the 72-bit message, Step 2 adds 375 zero bits for alignment to reach 448 bits, Step 3 appends the 64-bit length encoding containing the value 72, resulting in a complete 512-bit block ready for hash processing. Each step is illustrated with color-coded bit sequences and byte boundaries against a technical grid background.](assets/sha256_padding_process.png)
+ ![Three-step SHA-256 padding process for the message  illustrating appending a 1 bit, adding 375 zeros, and appending the 64-bit message length to form a final 512-bit block](assets/sha256_padding_process.png)
+
+
+
