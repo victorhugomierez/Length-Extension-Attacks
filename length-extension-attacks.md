@@ -284,4 +284,115 @@ Total, 512 bits, Block ready for processing.
  ![Three-step SHA-256 padding process for the message  illustrating appending a 1 bit, adding 375 zeros, and appending the 64-bit message length to form a final 512-bit block](assets/sha256_padding_process.png)
 
 
+### SHA‑256 Main Computation 
+1. Inputs to the Computation
+Message schedule: 64 blocks, denoted W[0]–W[63].
+
+Working variables: Eight registers (a–h), initialised from constants H0–H7.
+
+Round constants: K[0]–K[63], derived from cube roots of the first 64 prime numbers.
+
+Example:
+
+Round 1 uses W[0] and K[0] = 0x428a2f98.
+
+Working variables start as:
+``` bash
+a = H0, b = H1, c = H2, d = H3, e = H4, f = H5, g = H6, h = H7
+```
+2. Logical Functions
+Choice (Ch):  
+Ch(e, f, g) = (e AND f) XOR (NOT e AND g)
+
+Example: If e = 1010 (binary), f = 1100, g = 0110 →
+Ch = (1010 AND 1100) XOR (0101 AND 0110) = 1000 XOR 0100 = 1100.
+
+Majority (Maj):  
+Maj(a, b, c) = (a AND b) XOR (a AND c) XOR (b AND c)
+
+Example: If a = 1110, b = 1011, c = 1001 →
+Maj = (1110 AND 1011) XOR (1110 AND 1001) XOR (1011 AND 1001)
+= 1010 XOR 1000 XOR 1001 = 0011.
+
+These functions ensure bit diffusion by mixing values based on selective and majority logic.
+
+3. Sigma Functions (Non‑linear Mixing)
+Σ1(e): ROTR(e, 6) XOR ROTR(e, 11) XOR ROTR(e, 25)
+
+Σ0(a): ROTR(a, 2) XOR ROTR(a, 13) XOR ROTR(a, 22)
+
+Example:  
+If e = 0b01101000 (binary for 104):
+
+ROTR(e, 6) = 10000110
+
+ROTR(e, 11) = 01000011
+
+ROTR(e, 25) = 00110001
+
+Σ1(e) = 10000110 XOR 01000011 XOR 00110001 = 11110100.
+
+4. Temporary Values
+Temp1 = h + Σ1(e) + Ch + K[i] + W[i]
+
+Temp2 = Σ0(a) + Maj
+
+Example (Round 1):  
+Suppose:
+
+h = 0x5be0cd19
+
+Σ1(e) = 0x11111111
+
+Ch = 0x22222222
+
+K[0] = 0x428a2f98
+
+W[0] = 0xabcdef01
+
+Then:
+```
+Temp1 = 0x5be0cd19 + 0x11111111 + 0x22222222 + 0x428a2f98 + 0xabcdef01
+Temp2 = Σ0(a) + Maj
+```
+5. Updating Working Variables
+After computing Temp1 and Temp2, the registers shift:
+```
+h = g
+g = f
+f = e
+e = d + Temp1
+d = c
+c = b
+b = a
+a = Temp1 + Temp2
+```
+Example:  
+If Temp1 = 0x12345678, Temp2 = 0x9abcdef0, then:
+
+a = 0x12345678 + 0x9abcdef0 = 0xACF13568
+
+e = d + Temp1 (adds diffusion into the chain).
+
+6. Iteration Across 64 Rounds
+Each round introduces a new W[i] and K[i].
+
+The working variables evolve, spreading influence of every bit across the state.
+
+After 64 rounds, the final values of a–h are added back to H0–H7.
+
+Example (Finalisation):
+```
+H0 = H0 + a
+H1 = H1 + b
+...
+H7 = H7 + h
+```
+This produces the 256‑bit digest, the unique fingerprint of the input.
+
+- Avalanche effect: A single bit change in the input cascades through 64 rounds, altering the final digest unpredictably.
+
+- Cryptographic resilience: The combination of logical functions, rotations, and prime‑derived constants ensures resistance against collision and pre‑image attacks.
+
+- Practical example: Hashing the string "hello" vs "h3llo" yields completely different 256‑bit outputs, despite only one character change.
 
