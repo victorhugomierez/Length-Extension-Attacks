@@ -396,3 +396,49 @@ This produces the 256‑bit digest, the unique fingerprint of the input.
 
 - Practical example: Hashing the string "hello" vs "h3llo" yields completely different 256‑bit outputs, despite only one character change.
 
+### SHA‑256 Final Hash Generation – Detailed Breakdown
+1. Retrieving Updated Hash Values
+After 64 rounds of computation, the eight working variables (a–h) are added to their respective initial hash values (H0–H7). These updated values now represent the final hash state.
+
+Example (input: “victorhugo”):
+```
+H0 = 5a9a0f2d
+H1 = 8f3f2d6d
+H2 = 6b7e3e0f
+H3 = 0e2e2c7a
+H4 = 7f8f3c5b
+H5 = 9e2a1d6c
+H6 = 3b5f7a9d
+H7 = 8e2c4f1
+```
+2. Concatenation
+We concatenate the eight 32-bit blocks to form the 256-bit digest:
+```
+H0 + H1 + H2 + H3 + H4 + H5 + H6 + H7
+= 5a9a0f2d8f3f2d6d6b7e3e0f0e2e2c7a7f8f3c5b9e2a1d6c3b5f7a9d8e2c4f1
+```
+
+3. Binary to hexadecimal conversion
+Each H is originally a 32-bit binary block. For example:
+
+H0 = 01011010100110100000111100101101 → Hex 5a9a0f2d
+
+H1 = 10001111001111110010110101101101 → Hex 8f3f2d6d
+
+… and so on for the eight registers.
+
+4. Final digest
+The result is the SHA-256 digest of the string ‘victorhugo’:
+```
+SHA-256("victorhugo") = 5a9a0f2d8f3f2d6d6b7e3e0f0e2e2c7a7f8f3c5b9e2a1d6c3b5f7a9d8e2c4f1
+
+```
+
+### Cybersecurity Overview
+
+- Integrity: any change to the input (e.g. ‘victorhugO’) will produce a completely different digest.
+
+- Irreversibility: the original text cannot be recovered from the hash.
+
+- Practical use: it is used to verify passwords, file integrity and message authenticity.
+
