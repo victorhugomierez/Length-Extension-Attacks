@@ -477,3 +477,80 @@ Attacker computes new hash using original digest as state.
 - Result:  
 The attacker obtains a valid hash for the extended message without knowing the secret key.
 
+## Practical example
+
+```bash
+~/Rooms/LengthExtensionAttacks/hash_extender# ./hash_extender --help
+
+--------------------------------------------------------------------------------
+HASH EXTENDER
+--------------------------------------------------------------------------------
+
+By Ron Bowes <ron @ skullsecurity.net>
+
+See LICENSE.txt for license information.
+
+Usage: ./hash_extender <--data=<data>|--file=<file>> --signature=<signature> --format=<format> [options]
+
+INPUT OPTIONS
+-d --data=<data>
+      The original string that we're going to extend.
+--data-format=<format>
+      The format the string is being passed in as. Default: raw.
+      Valid formats: raw, hex, html, cstr
+--file=<file>
+      As an alternative to specifying a string, this reads the original string
+      as a file.
+-s --signature=<sig>
+      The original signature.
+--signature-format=<format>
+      The format the signature is being passed in as. Default: hex.
+      Valid formats: raw, hex, html, cstr
+-a --append=<data>
+      The data to append to the string. Default: raw.
+--append-format=<format>
+      Valid formats: raw, hex, html, cstr
+--appendfile=<file>
+      As an alternative to specifying a string, this reads the string to append
+      as a file.
+-f --format=<all|format> [REQUIRED]
+      The hash_type of the signature. This can be given multiple times if you
+      want to try multiple signatures. 'all' will base the chosen types off
+      the size of the signature and use the hash(es) that make sense.
+      Valid types: md4, md5, ripemd160, sha, sha1, sha256, sha512, sm3, tiger192v1, tiger192v2, whirlpool
+-l --secret=<length>
+      The length of the secret, if known. Default: 8.
+--secret-min=<min>
+--secret-max=<max>
+      Try different secret lengths (both options are required)
+
+OUTPUT OPTIONS
+--table
+      Output the string in a table format.
+-o --out-file=<sig>
+      Output data file.
+--out-data-format=<format>
+      Output data format.
+      Valid formats: none, raw, hex, html, html-pure, cstr, cstr-pure, fancy
+--out-signature-format=<format>
+      Output signature format.
+      Valid formats: none, raw, hex, html, html-pure, cstr, cstr-pure, fancy
+
+OTHER OPTIONS
+-h --help 
+      Display the usage (this).
+--test
+      Run the test suite.
+-q --quiet
+      Only output what's absolutely necessary (the output string and the
+      signature)
+
+The arguments you probably want to give are (see above for more details):
+-d <data>
+-s <original signature>
+-a <data to append>
+-f <hash format>
+-l <length of secret>
+
+```
+![Hash Extender](hash_extender.png)
