@@ -442,3 +442,38 @@ SHA-256("victorhugo") = 5a9a0f2d8f3f2d6d6b7e3e0f0e2e2c7a7f8f3c5b9e2a1d6c3b5f7a9d
 
 - Practical use: it is used to verify passwords, file integrity and message authenticity.
 
+### Length Extension Attack 
+A Length Extension Attack (LEA) exploits the way certain hash functions (MD5, SHA‑1, SHA‑256) process data using the Merkle–Damgård construction. These functions operate block‑by‑block, carrying forward an internal state. If an attacker knows the final hash of a message, they can treat it as the internal state and continue hashing new data — without knowing the original message or secret key.
+
+### How It Works
+- Requirements for the attacker:
+
+The hash of the original message.
+
+The length of the original message (or a good guess).
+
+Knowledge of the padding rules for the hash function.
+
+- Process:
+
+The final hash represents the internal state after all blocks of the original message.
+
+The attacker uses this state as a starting point.
+
+They append new data (plus correct padding) and compute a valid new hash.
+
+- Normal hashing:
+```
+Message: "user=test"
+Hash: <digest>
+```
+- Length extension attack:
+```
+Original message: "user=test"
+Attacker appends: "&admin=true"
+New message (conceptually): "user=test" + padding + "&admin=true"
+Attacker computes new hash using original digest as state.
+```
+- Result:  
+The attacker obtains a valid hash for the extended message without knowing the secret key.
+
