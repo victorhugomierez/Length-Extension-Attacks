@@ -648,3 +648,94 @@ Note that in some cases, the secret length varies depending on the secret phrase
 The server, trusting the signature, will validate the hash and grant access to "4.png" because the new signature matches the appended path:
 
 ![URL bar with a crafted request exploiting a length extension attack. The URL displays the file parameter set to 1.png followed by padding bytes and the path traversal sequence /../4.png, along with a signature parameter containing a SHA-256 hash value. The page content shows a product image labeled Product 4 with the text Product 4, demonstrating successful unauthorized access to file 4.png through the vulnerability](product_hash.png)
+
+
+#### In this task, we'll explore a real-world scenario where a length extension attack can be used to manipulate a signed cookie and escalate privileges from a regular user to an admin
+
+To prevent tampering, it signs the cookies named auth with a SHA-256 hash based on a secret key. However, since SHA-256 is vulnerable to length extension attacks, we can potentially alter the cookie's content while keeping the signature valid, allowing us to gain unauthorized access
+![unauthorized access](unauthorized_access.png)
+
+- Here's the vulnerable code that verifies the authenticity of the cookie:
+```php
+require_once("secrets.php");
+
+// Default authorization status
+$auth = false;
+
+// Check if the 'auth' and 'hsh' cookies are set
+if (isset($_COOKIE["auth"]) && isset($_COOKIE["hsh"])) {
+    $auth = $_COOKIE["auth"]; // Get the original auth string
+    $hsh = $_COOKIE["hsh"];
+
+    // Verify the hash to ensure integrity
+    if ($hsh === hash("sha256", $SECRET . $auth)) {
+        // Instead of trying to parse, check if 'role=1' exists in the string
+        if (strpos($auth, 'role=1') !== false) {
+            echo "<html><head><title>Admin Panel</title></head><body>";
+            echo "<h1>Welcome, Admin!</h1><br><br>";
+        } elseif (strpos($auth, 'role=0') !== false) {
+            echo "<html><head><title>User Panel</title></head><body>";
+            echo "<h1>Welcome, User!</h1><br><br>";
+        }
+    }
+}
+```
+
+```bash
+~/Rooms/LengthExtensionAttacks/hash_extender# ./hash_extender --data 'username=user;role=0' --append ';role=1' --signature bfe0fa5c36531773c73dcc8d2a931301f69cf9add05a1f35dcfa2d48b44c37f0 --format sha256 --secret 8 --out-data-format=html
+Type: sha256
+Secret length: 8
+New signature: daf3dbdc47fd93fabe110ef0ed58a39d1eb59c234a7fd66d0fe2e1dd76f1e37f
+New string: username%3duser%3brole%3d0%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%e0%3brole%3d1
+
+```
+- After setting these cookies and refreshing the page, the server will recognize the modified cookie as valid and provide admin-level access because the server reads role=1 in the auth string.
+
+![auth_string](auth_string.png)
+
+### Preventing Length Extension Attacks
+Length extension attacks exploit the way Merkle–Damgård hash functions (MD5, SHA‑1, SHA‑256) process data. Fortunately, there are straightforward defences.
+
+1. Use HMAC (Hash‑based Message Authentication Code)
+Why it works:
+
+The secret key is mixed into the data before hashing.
+
+Attackers cannot extend the message without knowing the key.
+
+This design fully prevents length extension attacks.
+
+Example in Python:
+```python
+import hmac, hashlib
+
+key = b'supersecretkey'
+message = b'important_data'
+
+hmac_hash = hmac.new(key, message, hashlib.sha256).hexdigest()
+print(hmac_hash)
+```
+
+- Result: A secure digest that cannot be forged by appending extra data.
+
+2. Stop Using Outdated Hash Functions
+MD5 and SHA‑1 are vulnerable and deprecated.
+
+- Modern alternatives: SHA‑3 or SHA‑256 with HMAC.
+
+Example:
+
+- Vulnerable: hash(secret || message) with MD5 → exploitable.
+
+- Secure: HMAC(secret, message) with SHA‑256 → resistant.
+
+3. Use Established Security Protocols
+Don’t build custom cryptographic solutions.
+
+Rely on proven standards like OAuth or JWT.
+
+JWTs signed with HMAC‑SHA256 are resistant to length extension attacks because the secret key is required for validation.
+
+Example:
+
+A JWT token signed with HMAC‑SHA256 cannot be extended or modified without invalidating the signature.
