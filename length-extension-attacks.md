@@ -553,7 +553,7 @@ The arguments you probably want to give are (see above for more details):
 -l <length of secret>
 
 ```
-![Hash Extender](hash_extender.png)
+![Hash Extender](assets/hash_extender.png)
 
 - Interpretation of the output
 Type: md5  
@@ -647,13 +647,13 @@ Note that in some cases, the secret length varies depending on the secret phrase
 - With this new signature, we can send a forged request to access "4.png" instead of "1.png". The request might look like this:
 The server, trusting the signature, will validate the hash and grant access to "4.png" because the new signature matches the appended path:
 
-![URL bar with a crafted request exploiting a length extension attack. The URL displays the file parameter set to 1.png followed by padding bytes and the path traversal sequence /../4.png, along with a signature parameter containing a SHA-256 hash value. The page content shows a product image labeled Product 4 with the text Product 4, demonstrating successful unauthorized access to file 4.png through the vulnerability](product_hash.png)
+![URL bar with a crafted request exploiting a length extension attack. The URL displays the file parameter set to 1.png followed by padding bytes and the path traversal sequence /../4.png, along with a signature parameter containing a SHA-256 hash value. The page content shows a product image labeled Product 4 with the text Product 4, demonstrating successful unauthorized access to file 4.png through the vulnerability](assets/product_hash.png)
 
 
 #### In this task, we'll explore a real-world scenario where a length extension attack can be used to manipulate a signed cookie and escalate privileges from a regular user to an admin
 
 To prevent tampering, it signs the cookies named auth with a SHA-256 hash based on a secret key. However, since SHA-256 is vulnerable to length extension attacks, we can potentially alter the cookie's content while keeping the signature valid, allowing us to gain unauthorized access
-![unauthorized access](unauthorized_access.png)
+![unauthorized access](assets/unauthorized_access.png)
 
 - Here's the vulnerable code that verifies the authenticity of the cookie:
 ```php
@@ -691,7 +691,7 @@ New string: username%3duser%3brole%3d0%80%00%00%00%00%00%00%00%00%00%00%00%00%00
 ```
 - After setting these cookies and refreshing the page, the server will recognize the modified cookie as valid and provide admin-level access because the server reads role=1 in the auth string.
 
-![auth_string](auth_string.png)
+![auth_string](assets/auth_string.png)
 
 ### Preventing Length Extension Attacks
 Length extension attacks exploit the way Merkle–Damgård hash functions (MD5, SHA‑1, SHA‑256) process data. Fortunately, there are straightforward defences.
